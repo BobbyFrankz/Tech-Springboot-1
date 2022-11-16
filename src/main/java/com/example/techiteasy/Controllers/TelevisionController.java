@@ -65,7 +65,7 @@ import java.util.List;
         if (deleteTelevision == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(id, HttpStatus.NO_CONTENT);
-    }
+      }
 
     }
 
