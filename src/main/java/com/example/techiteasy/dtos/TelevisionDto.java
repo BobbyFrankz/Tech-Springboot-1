@@ -1,24 +1,15 @@
-package com.example.techiteasy.Models;
+package com.example.techiteasy.dtos;
 
 
-import lombok.AllArgsConstructor;
+import com.example.techiteasy.Models.RemoteController;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.persistence.*;
-
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "Televisions")
-public class Television {
-    @Id
-    @GeneratedValue
-    private Long id;
+
+public class TelevisionDto {
     private String type;
     private String brand;
     private String name;
@@ -35,11 +26,7 @@ public class Television {
     private boolean ambiLight;
     private int originalStock;
     private int sold;
-    @OneToOne
+    @JsonIncludeProperties("id")
     private RemoteController remoteController;
 
 }
-
-
-
-
