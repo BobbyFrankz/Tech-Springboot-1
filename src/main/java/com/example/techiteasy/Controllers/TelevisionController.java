@@ -1,89 +1,68 @@
 package com.example.techiteasy.Controllers;
-
-import com.example.techiteasy.Repositories.TelevisionRepository;
-import com.example.techiteasy.exceptions.RecordNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import com.example.techiteasy.dtos.TelevisionDto;
+import com.example.techiteasy.service.TelevisionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import com.example.techiteasy.Models.Television;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import java.net.URI;
-import java.util.Optional;
+
 
 
 @RestController
 @RequestMapping("/televisions")
 public class TelevisionController {
-    @Autowired
-    private TelevisionRepository tvRepos;
+    private final TelevisionService tvService;
+
+    public TelevisionController(TelevisionService tvService) {
+        this.tvService = tvService;
+    }
 
     @GetMapping("")
-    public ResponseEntity<Iterable <Television>> getTelevisions() {
-        return ResponseEntity.ok(tvRepos.findAll());
+    public ResponseEntity<Iterable<TelevisionDto>> getTelevisions() {
+        return ResponseEntity.ok(tvService.getTelevisions());
     }
 
 
     @GetMapping("/{id}")
-    public ResponseEntity <Television> getOneTelevision(@PathVariable Long id) {
-        Optional <Television>  foundTelevision = tvRepos.findById(id);
+    public ResponseEntity<TelevisionDto> getOneTelevision(@PathVariable Long id) {
 
-        if (foundTelevision.isPresent()) {
-            Television television1 = foundTelevision.get();
-            return ResponseEntity.ok(television1);
-        } else {
-            throw new RecordNotFoundException("id not found");
-        }
+        return ResponseEntity.ok(tvService.getOneTelevision(id));
     }
-
 
 
     @PostMapping("")
-    public ResponseEntity<Object> postTv(@RequestBody Television television) {
-        Television savedTelevision = tvRepos.save(television);
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/televisions/" + savedTelevision.getId()).toUriString());
+    public ResponseEntity<TelevisionDto> postTv(@RequestBody TelevisionDto televisionDto) {
 
-        return ResponseEntity.created(uri).body(television);
+        long id = tvService.createTelevision(televisionDto);
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/televisions/" + id).toUriString());
+        return ResponseEntity.created(uri).body(televisionDto);
 
 
     }
 
-    @
-    DeleteMapping("/{id}")
+    @DeleteMapping("{id}")
     public ResponseEntity<String> deletedTv(@PathVariable Long id) {
 
-        Optional <Television> deletedTelevision = tvRepos.findById(id);
-        if (deletedTelevision.isPresent()) {
-            Television television1 = deletedTelevision.get();
-            tvRepos.delete(television1);
-            return ResponseEntity.ok("Tv Removed");
-        } else {
-            throw new RecordNotFoundException("Television(ID) not found!");
-        }
-
-
+        return ResponseEntity.ok(tvService.deletedTv(id));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Object> updateTelevision(@PathVariable Long id, @RequestBody Television television) {
-        Optional <Television> updatedTelevision = tvRepos.findById(id);
-        if (updatedTelevision.isPresent()) {
-            // haal de television uit de database
-            Television television1 = updatedTelevision.get();
-            // pas de television aan met nieuwe waarde
-            television1.setName(television.getName());
-            // sla de television op
-            tvRepos.save(television1);
-            return ResponseEntity.ok(television1);
-        } else {
-            throw new RecordNotFoundException("Television(id) not found");
-        }
+    @PutMapping("{id}")
+    public ResponseEntity<TelevisionDto> updateTelevision(@PathVariable Long id, @RequestBody TelevisionDto televisionDto) {
 
 
+        return ResponseEntity.ok(tvService.updateTelevision(id, televisionDto));
     }
 
+    @PutMapping("{id}/remotecontroller/{remoteControllerId}")
+    public ResponseEntity <String> assignRemoteToTelevision(@PathVariable Long id, @PathVariable Long remoteControllerId) {
+
+        tvService.assignedRemoteToTv(id,remoteControllerId);
+        return ResponseEntity.ok("Televisie is gekoppeld");
+
     }
+}
+
+
 
 
